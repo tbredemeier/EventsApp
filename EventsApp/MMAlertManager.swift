@@ -22,13 +22,13 @@ func showAlertWithError(error : NSError!, forVC : UIViewController)
 
     switch error.code
     {
-    case kPFErrorUsernameTaken:
+    case 202: // kPFErrorUsernameTaken:
         errorDescription = "Username unavailable."
-    case kPFErrorObjectNotFound:
+    case 101: // kPFErrorObjectNotFound:
         errorDescription = "Incorrect username or password."
-    case kPFErrorUsernameMissing:
+    case 200: // kPFErrorUsernameMissing:
         errorDescription = "Please enter a username."
-    case kPFErrorUserPasswordMissing:
+    case 201: // kPFErrorUserPasswordMissing:
         errorDescription = "Please enter a password."
     default:
         break

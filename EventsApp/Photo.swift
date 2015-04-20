@@ -1,5 +1,5 @@
 //
-//  Event.swift
+//  Photo.swift
 //  Event_App
 //
 //  Created by Johnny Appleseed on 11/26/14.
@@ -8,43 +8,40 @@
 
 import Foundation
 
-class Event: PFObject, PFSubclassing
+class Photo: PFObject, PFSubclassing
 {
-    override class func load()
+    override class func initialize()
     {
         self.registerSubclass()
     }
 
-    class func parseClassName() -> String!
+    class func parseClassName() -> String
     {
-        return "Event"
+        return "Photo"
     }
 
-    ///The title of the event
-    @NSManaged var title : String!
-    ///Details about the event
-    @NSManaged var details : String!
-    ///The profile of the user who created the event
-    @NSManaged var host : Profile!
-    ///The Parse location object of where the event is taking place (must be converted to a CLLocation for further functionality)
-    @NSManaged var location : PFGeoPoint!
-    ///The file of the photo representing the event (must be converted to UIImage for displaying)
-    @NSManaged var eventPicFile : PFFile!
+    ///The event that the photo was taken at
+    @NSManaged var event : Event!
+    ///The file of the photo's image (must be converted to UIImage for displaying)
+    @NSManaged var imageFile : PFFile!
+    ///The profile correlating to the photographer of the image
+    @NSManaged var photographer : Profile!
 
-    ///Queries for all events and returns them in the block callback as [Event]
-    class func queryForEvents(completed:(events : [Event]!, error : NSError!) -> Void)
+    ///Creates a new user
+    class func queryForPhotos(completed:(photos : [Photo]!, error : NSError!) -> Void)
     {
-        let query = Event.query()
-        query.includeKey("host")
-        query.orderByDescending("createdAt")
-        query.findObjectsInBackgroundWithBlock { (events, error) -> Void in
+        let query = Photo.query()
+        query!.includeKey("event")
+        query!.includeKey("photographer")
+        query!.orderByDescending("createdAt")
+        query!.findObjectsInBackgroundWithBlock { (photos, error) -> Void in
             if error != nil
             {
-                completed(events: nil, error: error)
+                completed(photos: nil, error: error)
             }
             else
             {
-                completed(events: events as [Event], error: nil)
+                completed(photos: photos as! [Photo], error: nil)
             }
         }
     }

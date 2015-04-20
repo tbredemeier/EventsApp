@@ -1,5 +1,5 @@
 //
-//  User.swift
+//  Profile.swift
 //  Event_App
 //
 //  Created by Johnny Appleseed on 11/26/14.
@@ -8,56 +8,59 @@
 
 import Foundation
 
-class User: PFUser, PFSubclassing
+class Profile: PFObject, PFSubclassing
 {
-    override class func load()
-    {
-        self.registerSubclass()
+    override class func initialize() {
+            self.registerSubclass()
     }
 
-    ///Creates a new user
-    class func registerNewUser(username : String!, password : String!, completed:(result : Bool!, error : NSError!) -> Void)
+    class func parseClassName() -> String
     {
-        let newUser = User()
-        newUser.username = username.lowercaseString
-        newUser.password = password.lowercaseString
+        return "Profile"
+    }
 
-        newUser.signUpInBackgroundWithBlock { (succeeded, parseError) -> Void in
+    ///The user that the profile points to
+    @NSManaged var user : User!
+    ///The name of this user on their profile
+    @NSManaged var name : String!
+    ///Where this user says they're from on their profile
+    @NSManaged var hometown : String!
+    ///The file of the user's profile image (must be converted to UIImage for displaying)
+    @NSManaged var profilePicFile : PFFile!
 
-            if parseError != nil
+    ///Creates a new profile
+    class func createProfile(user : User!, completed:(profile: Profile!, succeeded: Bool!, error: NSError!) -> Void)
+    {
+        let newProfile = Profile()
+        newProfile.user = user
+
+        newProfile.saveInBackgroundWithBlock { (succeeded, error) -> Void in
+            if error != nil
             {
-                completed(result: false, error: parseError)
+                completed(profile: nil, succeeded: false, error: error)
             }
             else
             {
-                Profile.createProfile(newUser, completed: { (profile, succeeded, error) -> Void in
-
-                    Profile.queryForCurrentUsersProfile({ (theProfile, error) -> Void in
-
-                        UniversalProfile.sharedInstance.profile = theProfile as Profile!
-                        completed(result: true, error: nil)
-                    })
-                })
+                completed(profile: newProfile, succeeded: true, error: error)
             }
         }
     }
 
-    ///Logs in a user
-    class func loginUser(username : String!, password : String!, completed:(result : Bool!, error : NSError!) -> Void)
+    ///Queries for the profile of the current user, and sets the kProfile singleton
+    class func queryForCurrentUsersProfile(completed:(profile : Profile!, error : NSError!) -> Void)
     {
-        PFUser.logInWithUsernameInBackground(username, password: password) { (user, parseError) -> Void in
-
-            if parseError != nil
+        let query = Profile.query()
+        query!.whereKey("user", equalTo: PFUser.currentUser()!)
+        query!.includeKey("user")
+        query!.getFirstObjectInBackgroundWithBlock { (theProfile, error) -> Void in
+            if error != nil
             {
-                completed(result: false, error: parseError)
+                completed(profile: nil, error: error)
             }
             else
             {
-                Profile.queryForCurrentUsersProfile({ (profile, error) -> Void in
-
-                    UniversalProfile.sharedInstance.profile = profile as Profile!
-                })
-                completed(result: true, error: nil)
+                UniversalProfile.sharedInstance.profile = theProfile as! Profile!
+                completed(profile: theProfile as! Profile!, error: nil)
             }
         }
     }

@@ -10,9 +10,13 @@ import Foundation
 
 class User: PFUser, PFSubclassing
 {
-    override class func load()
+    override class func initialize()
     {
-        self.registerSubclass()
+        var onceToken : dispatch_once_t = 0;
+        dispatch_once(&onceToken)
+            {
+                self.registerSubclass()
+        }
     }
 
     ///Creates a new user

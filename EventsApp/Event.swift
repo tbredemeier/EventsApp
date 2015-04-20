@@ -10,18 +10,20 @@ import Foundation
 
 class Event: PFObject, PFSubclassing
 {
-    override class func load()
+    override class func initialize()
     {
         self.registerSubclass()
     }
 
-    class func parseClassName() -> String!
+    class func parseClassName() -> String
     {
         return "Event"
     }
 
     ///The title of the event
     @NSManaged var title : String!
+    ///The date of the event
+    @NSManaged var date : NSDate
     ///Details about the event
     @NSManaged var details : String!
     ///The profile of the user who created the event
@@ -35,16 +37,16 @@ class Event: PFObject, PFSubclassing
     class func queryForEvents(completed:(events : [Event]!, error : NSError!) -> Void)
     {
         let query = Event.query()
-        query.includeKey("host")
-        query.orderByDescending("createdAt")
-        query.findObjectsInBackgroundWithBlock { (events, error) -> Void in
+        query!.includeKey("host")
+        query!.orderByDescending("createdAt")
+        query!.findObjectsInBackgroundWithBlock { (events, error) -> Void in
             if error != nil
             {
                 completed(events: nil, error: error)
             }
             else
             {
-                completed(events: events as [Event], error: nil)
+                completed(events: events as! [Event], error: nil)
             }
         }
     }
